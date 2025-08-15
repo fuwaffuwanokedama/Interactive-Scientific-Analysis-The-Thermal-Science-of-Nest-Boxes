@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブ科学分析：巣箱の熱リスク</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Scientific Blue & Neutral Gray -->
+    <!-- Application Structure Plan: A multi-part interactive document. Part I provides static, detailed text from the source report to establish the scientific foundation. Part II is the core "Interactive Camera Lab," allowing users to manipulate specific camera features (resolution, IR, etc.) to see their direct impact on power consumption and temperature, making the abstract data tangible. Part III presents the detailed solutions from the report. This structure guides the user from understanding the problem scientifically to exploring its causes interactively, and finally to learning the solutions. -->
+    <!-- Visualization & Content Choices: The primary visualization is the "Camera Lab" dashboard. Goal: Explore/Analyze. Method: Custom JS with interactive toggles and a dynamic calculation display. Justification: Directly addresses user feedback for more granular control and transparency over the simulation, connecting specific features to wattage and temperature outcomes. Text from the original detailed report is used verbatim to retain scientific rigor. Goal: Inform. Method: HTML/CSS. Justification: Fulfills user's request for the full, detailed document. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        h1, h2, h3, h4 {
+            font-weight: 700;
+        }
+        .report-section {
+            border-left: 4px solid #3b82f6; /* blue-500 */
+            padding-left: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .temp-display {
+            transition: all 0.3s ease-in-out;
+        }
+        .temp-safe { background-color: #22c55e; color: white; }
+        .temp-caution { background-color: #f59e0b; color: white; }
+        .temp-danger { background-color: #ef4444; color: white; }
+        .temp-lethal { background-color: #8b5cf6; color: white; }
+        
+        .toggle-bg:after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: white;
+            border-radius: 9999px;
+            height: 1.25rem;
+            width: 1.25rem;
+            transition: 0.3s;
+        }
+        input:checked + .toggle-bg:after {
+            transform: translateX(100%);
+        }
+        input:checked + .toggle-bg {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-20">
+        <div class="container mx-auto px-6 py-4">
+            <h1 class="text-2xl md:text-3xl text-slate-900">巣箱内カメラの生物物理学的リスク：インタラクティブ科学分析</h1>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+        <div class="max-w-4xl mx-auto">
+
+            <section class="report-section">
+                <h2 class="text-2xl mb-4">要旨</h2>
+                <p class="mb-4">本報告書は、ライブストリーミングカメラが設置された巣箱内部で飼育されているリスの母子、特に新生児（幼獣）が直面する潜在的な生物物理学的リスクについて、包括的な科学的分析を行うものです。分析の結果、カメラシステム、特に赤外線（IR）照明機能は、巣箱内部に相当な熱負荷を与えていることが断定されます。木製の巣箱は断熱性が高く、内部で発生した熱が外部へ効果的に放出されず、「熱の罠」と化しています。日射とカメラ熱を考慮すると、巣箱内部の温度は生物にとって極めて危険な領域である**40℃ (104℉) 以上**にまで上昇する可能性が極めて高いと結論付けられます。</p>
+            </section>
+
+            <section class="report-section">
+                <h2 class="text-2xl mb-4">第I部：巣箱の過熱に関する科学的背景</h2>
+                <h3 class="text-xl mb-3">1.1. なぜ夏の巣箱は危険なのか：生物学的な脆弱性</h3>
+                <p class="mb-4">ハイイロリスは通常、年に2回繁殖し、その2回目の出産は北米の多くの地域で7月から8月の夏の盛りに行われます。生まれたばかりの赤ちゃんは**晩成性**であり、毛もなく、目も開いておらず、完全に無防備な状態で生まれます。彼らは生後6〜7週間経つまで巣を離れることができず、その間、巣の中の微気候に完全に左右されます。</p>
+                <h3 class="text-xl mb-3">1.2. 致命的な微気候の科学：物理学と生理学</h3>
+                <p class="mb-2">不適切な設計や配置の巣箱は、外部からの日射熱と、内部からの代謝熱の組み合わせによって、致命的な微気候を形成します。</p>
+                <p class="mb-2"><strong>物理的な側面：</strong> 巣箱は太陽の放射エネルギーを吸収し、熱として内部に閉じ込めます。研究によれば、直射日光に晒された巣箱の内部は、外気温と比較して**5℃から10℃（華氏で9℉から18℉の上昇に相当）**、あるいはそれ以上に高温になることが実証されています。</p>
+                <p class="mb-4"><strong>生理学的な側面：</strong> この外部からの加熱は、巣箱の中にいる動物自身の体熱によって、さらに危険なものとなります。授乳中の母体と子どもの集団は、相当な量の代謝熱を発生させます。**「熱放散限界仮説」**によれば、母リスは自らの体温が危険なレベルに達すると、自己保存本能から巣を離れることを選択します。これは育児放棄ではなく、生命を維持するための生理学的な限界反応です。</p>
+            </section>
+
+            <section id="interactive-sim" class="report-section">
+                <h2 class="text-2xl mb-4">第II部：増幅要因のインタラクティブ分析 - カメララボ</h2>
+                <p class="mb-6">ここでは、カメラの様々な機能が巣箱の熱環境にどのような影響を与えるかを、あなた自身の手でシミュレーションできます。各設定を変更し、合計消費電力と予測温度の変化を確認してください。</p>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        
+                        <!-- Control Panel -->
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-bold border-b pb-2">コントロールパネル</h3>
+                            
+                            <div>
+                                <label for="ambient-temp" class="block font-bold text-lg mb-2">1. 外気温</label>
+                                <input type="range" id="ambient-temp" min="20" max="40" value="29" step="0.5" class="w-full">
+                                <div class="text-center text-lg font-semibold"><span id="ambient-temp-value">29.0</span>°C / <span id="ambient-temp-value-f">84.2</span>°F</div>
+                            </div>
+
+                            <div>
+                                <label class="flex items-center justify-between font-bold text-lg">
+                                    <span>2. 日射効果</span>
+                                    <div class="relative">
+                                        <input type="checkbox" id="solar-gain-toggle" class="sr-only">
+                                        <div class="toggle-bg block bg-gray-200 w-10 h-6 rounded-full"></div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-2">3. カメラ機能 (3台構成)</h4>
+                                <div class="space-y-2">
+                                    <label class="flex items-center justify-between p-2 bg-slate-100 rounded">
+                                        <span>解像度: 1080p (+1.5W/台)</span>
+                                        <div class="relative">
+                                            <input type="checkbox" class="camera-feature" data-wattage="1.5" id="feat-1080p" checked>
+                                            <div class="toggle-bg block bg-gray-200 w-10 h-6 rounded-full"></div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center justify-between p-2 bg-slate-100 rounded">
+                                        <span>解像度: 4K (+3.0W/台)</span>
+                                        <div class="relative">
+                                            <input type="checkbox" class="camera-feature" data-wattage="3.0" id="feat-4k">
+                                            <div class="toggle-bg block bg-gray-200 w-10 h-6 rounded-full"></div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center justify-between p-2 bg-slate-100 rounded">
+                                        <span>赤外線暗視 (IR) (+4.0W/台)</span>
+                                        <div class="relative">
+                                            <input type="checkbox" class="camera-feature" data-wattage="4.0" id="feat-ir">
+                                            <div class="toggle-bg block bg-gray-200 w-10 h-6 rounded-full"></div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center justify-between p-2 bg-slate-100 rounded">
+                                        <span>高フレームレート (+1.0W/台)</span>
+                                        <div class="relative">
+                                            <input type="checkbox" class="camera-feature" data-wattage="1.0" id="feat-hfr">
+                                            <div class="toggle-bg block bg-gray-200 w-10 h-6 rounded-full"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Display Panel -->
+                        <div class="space-y-6">
+                             <h3 class="text-xl font-bold border-b pb-2">分析結果</h3>
+                             <div class="bg-slate-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-lg mb-2">合計消費電力 (3台)</h4>
+                                <p class="text-4xl font-bold text-blue-600"><span id="total-wattage">4.5</span> W</p>
+                                <p class="text-sm text-slate-500">1W = 1 J/s の熱エネルギーに変換</p>
+                             </div>
+                             <div class="bg-slate-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-lg mb-2">計算の内訳</h4>
+                                <div id="temp-breakdown" class="space-y-1">
+                                </div>
+                             </div>
+                             <div class="text-center">
+                                <p class="text-lg font-bold mb-2">最終的な巣箱内予測温度</p>
+                                <div id="internal-temp-display" class="temp-display p-4 rounded-lg text-4xl font-bold">--.- °C / --.- °F</div>
+                                <p id="temp-warning" class="mt-2 text-red-600 font-bold h-6"></p>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="report-section">
+                <h2 class="text-2xl mb-4">第III部：結論と具体的な提言</h2>
+                <h3 class="text-xl mb-3">3.1. リスクの統合的評価</h3>
+                <ul class="list-disc list-inside space-y-2 mb-4">
+                    <li><strong>熱リスクは「高く、定量的であり、観察された苦痛のほぼ確実な原因」である。</strong> 高性能カメラを狭く断熱された木製の巣箱に設置するという組み合わせは、危険な熱の罠を生み出している。</li>
+                    <li><strong>EMFリスクは「不確実だが無視できない」ものである。</strong> 予防原則に基づけば、発達段階にある脆弱な動物を、複数の高周波発生源に慢性的かつ至近距離で曝露させることは、容認できない非倫理的なリスクである。</li>
+                    <li><strong>現在の設置状況は、野生動物の観察と福祉に関する確立されたガイドラインに対して「倫理的に非準拠」である。</strong></li>
+                </ul>
+                <h3 class="text-xl mb-3">3.2. 倫理的かつ安全な観察のための提言</h3>
+                <p class="mb-2">観察対象の福祉を最優先し、倫理的な観察を継続するために、以下の段階的な改善策を講じるべきである。</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>即時対応：内部カメラの停止。</strong> 観察されている急性の苦痛と、計算によって裏付けられた危険な高温状態を考慮すると、これが最も優先されるべき措置である。</li>
+                    <li><strong>熱負荷の抜本的削減：</strong> 複数のカメラを、単一の低消費電力カメラに置き換える。また、4Kではなく720pで配信するなど、負荷の低い設定を選択する。</li>
+                    <li><strong>熱源の外部化：</strong> 赤外線照明を巣箱の外部に設置する。可能であればWi-Fiを使わない有線接続を利用し、熱とEMFの両リスクを排除する。</li>
+                    <li><strong>放熱性の改善：</strong> 専門家の助言のもと、巣箱の上部と下部に換気口を設ける。</li>
+                    <li><strong>倫理的再評価：</strong> いかなる監視システムを再導入する前にも、野生動物のリハビリテーション専門家に相談し、動物の福祉が絶対的な最優先事項であることを確認する。</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ambientTempSlider = document.getElementById('ambient-temp');
+            const ambientTempValue = document.getElementById('ambient-temp-value');
+            const ambientTempValueF = document.getElementById('ambient-temp-value-f');
+            const solarGainToggle = document.getElementById('solar-gain-toggle');
+            const cameraFeatureToggles = document.querySelectorAll('.camera-feature');
+            const totalWattageDisplay = document.getElementById('total-wattage');
+            const internalTempDisplay = document.getElementById('internal-temp-display');
+            const tempWarning = document.getElementById('temp-warning');
+            const tempBreakdown = document.getElementById('temp-breakdown');
+            
+            const feat1080p = document.getElementById('feat-1080p');
+            const feat4k = document.getElementById('feat-4k');
+
+            const BASE_WATTAGE_PER_CAMERA = 0;
+
+            function CtoF(celsius) {
+                return (celsius * 9 / 5) + 32;
+            }
+
+            function calculateWattage() {
+                let totalWattage = BASE_WATTAGE_PER_CAMERA * 3;
+                cameraFeatureToggles.forEach(toggle => {
+                    if (toggle.checked) {
+                        totalWattage += parseFloat(toggle.dataset.wattage) * 3;
+                    }
+                });
+                return totalWattage;
+            }
+
+            function updateSimulation() {
+                const ambientC = parseFloat(ambientTempSlider.value);
+                const ambientF = CtoF(ambientC);
+                
+                ambientTempValue.textContent = ambientC.toFixed(1);
+                ambientTempValueF.textContent = ambientF.toFixed(1);
+
+                const totalWattage = calculateWattage();
+                totalWattageDisplay.textContent = totalWattage.toFixed(1);
+
+                const P = totalWattage;
+                const A = 0.36; // m^2
+                const h = 8; // W/(m^2·K)
+                const cameraRise = (P > 0) ? (P / (h * A)) : 0;
+                
+                const solarGainRise = solarGainToggle.checked ? 5.0 : 0.0;
+
+                const internalTempC = ambientC + solarGainRise + cameraRise;
+                const internalTempF = CtoF(internalTempC);
+
+                internalTempDisplay.textContent = `${internalTempC.toFixed(1)} °C / ${internalTempF.toFixed(1)} °F`;
+
+                internalTempDisplay.classList.remove('temp-safe', 'temp-caution', 'temp-danger', 'temp-lethal');
+                let warningText = '';
+
+                if (internalTempC >= 42) {
+                    internalTempDisplay.classList.add('temp-lethal');
+                    warningText = '致命的な温度域';
+                } else if (internalTempC >= 40) {
+                    internalTempDisplay.classList.add('temp-danger');
+                    warningText = '極めて危険な温度';
+                } else if (internalTempC >= 37) {
+                    internalTempDisplay.classList.add('temp-caution');
+                    warningText = '熱ストレス警告';
+                } else {
+                    internalTempDisplay.classList.add('temp-safe');
+                }
+                tempWarning.textContent = warningText;
+
+                tempBreakdown.innerHTML = `
+                    <div class="flex justify-between"><span>外気温:</span> <span>${ambientC.toFixed(1)}°C</span></div>
+                    <div class="flex justify-between"><span>日射効果:</span> <span>+${solarGainRise.toFixed(1)}°C</span></div>
+                    <div class="flex justify-between"><span>カメラ熱 (ΔT):</span> <span>+${cameraRise.toFixed(1)}°C</span></div>
+                    <hr class="my-1 border-slate-300">
+                    <div class="flex justify-between font-bold text-blue-600"><span>合計予測:</span> <span>${internalTempC.toFixed(1)}°C</span></div>
+                `;
+            }
+            
+            ambientTempSlider.addEventListener('input', updateSimulation);
+            solarGainToggle.addEventListener('change', updateSimulation);
+            cameraFeatureToggles.forEach(toggle => {
+                toggle.addEventListener('change', (event) => {
+                    if(event.target.id === 'feat-1080p' && event.target.checked) {
+                        feat4k.checked = false;
+                    }
+                    if(event.target.id === 'feat-4k' && event.target.checked) {
+                        feat1080p.checked = false;
+                    }
+                    updateSimulation();
+                });
+            });
+
+            updateSimulation();
+        });
+    </script>
+</body>
+</html>
